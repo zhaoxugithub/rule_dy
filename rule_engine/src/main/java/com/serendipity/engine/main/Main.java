@@ -1,7 +1,14 @@
 package com.serendipity.engine.main;
 
+import com.serendipity.engine.beans.EventBean;
+import com.serendipity.engine.beans.RuleMatchResult;
+import com.serendipity.engine.function.Json2EventBeanMapFunction;
+import com.serendipity.engine.function.RuleMatchKeyedProcessFunction;
 import com.serendipity.engine.source.KafkaConsumerBuilder;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
@@ -18,14 +25,14 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
         KafkaConsumerBuilder kafkaConsumerBuilder = new KafkaConsumerBuilder();
-
         DataStreamSource<String> dds = env.addSource(kafkaConsumerBuilder.build("yinew_applog"));
-
-        dds.print();
-
-
+        //将str转成bean,并且判断空
+        DataStream<EventBean> dsBean = dds.map(new Json2EventBeanMapFunction()).filter(e -> e != null);
+        //将数据编程keyStream,按照deviceId分区
+        KeyedStream<EventBean, String> keyedStream = dsBean.keyBy(bean -> bean.getDeviceId());
+        DataStream<RuleMatchResult> mathchResultDs = keyedStream.process(new RuleMatchKeyedProcessFunction());
+        mathchResultDs.print("mathchResultDs=");
         env.execute();
     }
 }
