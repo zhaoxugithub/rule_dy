@@ -89,9 +89,9 @@ public class ActionLogAutoGen {
     public static LogBean getLogBean(){
         LogBean logBean = new LogBean();
         // 生成的账号形如： 004078
-        String account = StringUtils.leftPad(RandomUtils.nextInt() + "", 6, "0");
+        String account = StringUtils.leftPad(RandomUtils.nextInt(0,100000) + "", 6, "0");
         logBean.setAccount(account);
-        logBean.setAppId("cn.doitedu.yinew");
+        logBean.setAppId("com.serendipity.yinew");
         logBean.setAppVersion("2.5");
         logBean.setCarrier("中国移动");
         // deviceid直接用account

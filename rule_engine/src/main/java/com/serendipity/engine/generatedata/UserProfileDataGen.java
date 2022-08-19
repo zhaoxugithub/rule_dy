@@ -1,4 +1,5 @@
 package com.serendipity.engine.generatedata;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -38,7 +39,7 @@ public class UserProfileDataGen {
             // 将这一条画像数据，添加到list中
             puts.add(put);
             // 攒满100条一批
-            if(puts.size()==100) {
+            if (puts.size() == 100) {
                 System.out.println("over..");
                 table.put(puts);
                 puts.clear();
@@ -46,7 +47,7 @@ public class UserProfileDataGen {
             System.out.println(i);
         }
         // 提交最后一批
-        if(puts.size()>0) table.put(puts);
+        if (puts.size() > 0) table.put(puts);
         conn.close();
     }
 }

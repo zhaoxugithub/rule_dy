@@ -1,4 +1,4 @@
-package com.serendipity.engine.main;
+package com.serendipity.engine.utils;
 
 import com.serendipity.engine.beans.EventParam;
 import com.serendipity.engine.beans.RuleConditions;
@@ -23,31 +23,24 @@ public class RuleMonitor {
     public static RuleConditions getRule() {
 
         RuleConditions ruleConditions = new RuleConditions();
-
+        ruleConditions.setRuleId("rule_001");
         HashMap<String, String> map = new HashMap<>();
-        map.put("p2", "v2");
+        //map.put("p2", "v2");
         //触发事件
         ruleConditions.setTriggerEvent(new EventParam("K", map, 0, -1, -1));
-
-
         //用户画像条件
         HashMap<String, String> userMap2 = new HashMap<>();
-        userMap2.put("tag87", "v2");
+        userMap2.put("tag65", "v2");
         userMap2.put("tag26", "v1");
         ruleConditions.setUserProfileConditions(userMap2);
-
-
         //行为事件
         HashMap<String, String> actionCountMap = new HashMap<>();
         actionCountMap.put("p6", "v8");
         actionCountMap.put("p12", "v5");
         EventParam eventParam = new EventParam("C", actionCountMap, 2, 1623945600000L, Long.MAX_VALUE);
         ruleConditions.setActionCountConditions(Arrays.asList(eventParam));
-
         //行为序列条件
         //ruleConditions.setActionSequenceCondition();
-
         return ruleConditions;
     }
-
 }

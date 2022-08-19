@@ -1,4 +1,4 @@
-package com.serendipity.engine.main;
+package com.serendipity.engine.utils;
 
 import com.serendipity.engine.beans.EventBean;
 import com.serendipity.engine.beans.EventParam;
@@ -33,7 +33,8 @@ public class EventParamComparator {
             for (String key : keys) {
                 //获取规则value
                 String targetValue = target.getProperties().get(key);
-                if (!targetValue.equals(param1.getEventProperties().get(key))) {
+                //target可能为空，不是每一条数据的中key都包含在触发规则中
+                if (targetValue == null || !targetValue.equals(param1.getEventProperties().get(key))) {
                     return false;
                 }
             }

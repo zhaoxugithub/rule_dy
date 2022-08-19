@@ -22,5 +22,4 @@ public class KafkaConsumerBuilder {
         FlinkKafkaConsumer<String> kafkaConsumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), props);
         return kafkaConsumer;
     }
-
 }

@@ -11,7 +11,7 @@ public class Hbase_test1 {
 //        hd1.dropTable("java_test1");
 
         // 创建表
-        hd1.createTable("java_test1", "info1", "info2");
+//        hd1.createTable("java_test1", "info1", "info2");
 
 //        // 像表中插入数据
 //        hd1.addRowData("java_test1","1001","info1","name","詹姆斯");
@@ -36,7 +36,7 @@ public class Hbase_test1 {
 //        hd1.deleteMultiRow("java_test1","1001","1002");
 //
 //        // 删除表
-//        hd1.dropTable("java_test1");
+        hd1.dropTable("yinew_profile");
 //
 //        // 关闭连接
 //        hd1.closeConn();

@@ -3,11 +3,18 @@ package com.serendipity.engine.function;
 import com.serendipity.engine.beans.EventBean;
 import com.serendipity.engine.beans.RuleConditions;
 import com.serendipity.engine.beans.RuleMatchResult;
-import com.serendipity.engine.main.EventParamComparator;
-import com.serendipity.engine.main.RuleMonitor;
+import com.serendipity.engine.queryservice.HbaseQueryServiceImpl;
+import com.serendipity.engine.utils.ConnectionUtils;
+import com.serendipity.engine.utils.EventParamComparator;
+import com.serendipity.engine.utils.RuleMonitor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.hadoop.hbase.client.Connection;
+
+import java.util.Map;
 
 /*
  * 规则系统第一版
@@ -24,14 +31,35 @@ import org.apache.flink.util.Collector;
             如果满足就去查询ck中的行为次数事件是否满足，满足就记录，不满足就返回
  */
 //<String, EventBean, RuleMatchResult> String是key,EventBean是输入类型，RuleMatchResult是输出类型
+@Slf4j
 public class RuleMatchKeyedProcessFunction extends KeyedProcessFunction<String, EventBean, RuleMatchResult> {
+    private Connection hbaseConnection = null;
+
+    private HbaseQueryServiceImpl hbaseQueryService = null;
+
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        //获取一个Hbase连接
+        hbaseConnection = ConnectionUtils.getHbaseConnection();
+        hbaseQueryService = new HbaseQueryServiceImpl(hbaseConnection);
+    }
+
     @Override
     public void processElement(EventBean eventBean, KeyedProcessFunction<String, EventBean, RuleMatchResult>.Context context, Collector<RuleMatchResult> collector) throws Exception {
+        log.debug("收到一条事件数据:eventId={},deviceId={},properties={}", eventBean.getEventId(), eventBean.getDeviceId(), eventBean.getProperties());
         //获取一个规则
         RuleConditions rule = RuleMonitor.getRule();
         //判断当前事件是否满足规则定义的触发事件条件
         if (!EventParamComparator.compare(rule.getTriggerEvent(), eventBean)) return;
-        //TODO 查询画像条件是否满足
+        log.debug("触发条件规则通过，满足事件id={}", "k");
+        //查询画像条件是否满足
+        Map<String, String> userProfileConditions = rule.getUserProfileConditions();
+        boolean queryProfileCondition = false;
+        if (userProfileConditions != null) {
+            queryProfileCondition = hbaseQueryService.queryProfileCondition(eventBean.getDeviceId(), userProfileConditions);
+            //如果不满足画像规则条件则整个规则计算就退出
+            if (!queryProfileCondition) return;
+        }
         //TODO 行为次数条件是否满足
         //TODO 行为序列是否满足
         //TODO 模拟随机命中
