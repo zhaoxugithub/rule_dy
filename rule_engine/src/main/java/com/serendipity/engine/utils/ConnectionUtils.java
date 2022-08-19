@@ -17,12 +17,13 @@ public class ConnectionUtils {
     static {
         System.setProperty("hadoop.home.dir", "D:\\soft\\hadoop");
     }
+
     static Config config = ConfigFactory.load();
 
     // 获取hbase连接的方法
     public static Connection getHbaseConnection() throws IOException {
         org.apache.hadoop.conf.Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.quorum",config.getString(ConfigNames.HBASE_ZK_QUORUM));
+        conf.set("hbase.zookeeper.quorum", config.getString(ConfigNames.HBASE_ZK_QUORUM));
         Connection hbaseConn = ConnectionFactory.createConnection(conf);
         log.debug("hbase connection successfully created");
         return hbaseConn;
@@ -33,9 +34,11 @@ public class ConnectionUtils {
 
         String ckDriver = config.getString(ConfigNames.CK_JDBC_DRIVER);
         String ckUrl = config.getString(ConfigNames.CK_JDBC_URL);
+        String username = config.getString(ConfigNames.CK_USERNAME);
+        String password = config.getString(ConfigNames.CK_PASSWORD);
 
         Class.forName(ckDriver);
-        java.sql.Connection conn = DriverManager.getConnection(ckUrl);
+        java.sql.Connection conn = DriverManager.getConnection(ckUrl, username, password);
         log.debug("clickhouse connection successfully created");
         return conn;
     }
@@ -46,9 +49,9 @@ public class ConnectionUtils {
         int port = config.getInt(ConfigNames.REDIS_PORT);
         Jedis jedis = new Jedis(host, port);
         String ping = jedis.ping();
-        if(StringUtils.isNotBlank(ping)){
+        if (StringUtils.isNotBlank(ping)) {
             log.debug("redis connection successfully created");
-        }else{
+        } else {
             log.error("redis connection creation failed");
         }
 

@@ -24,4 +24,7 @@ public class EventParam {
 
     //表示的是事件触发的结束时间
     private long timeRangeEnd;
+
+    //一个事件产生了就意味着一条查询ck的sql已经产生，也是属于触发规则中的一个
+    private String querySql;
 }
