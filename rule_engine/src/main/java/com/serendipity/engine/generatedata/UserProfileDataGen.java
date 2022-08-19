@@ -18,8 +18,7 @@ public class UserProfileDataGen {
     public static void main(String[] args) throws IOException {
         System.setProperty("hadoop.home.dir", "D:\\soft\\hadoop");
         Configuration conf = HBaseConfiguration.create();
-        conf.set("hbase.zookeeper.quorum", "yun");
-        conf.set("hbase.zookeeper.property.clientPort", "12181");
+        conf.set("hbase.zookeeper.quorum", "centos201:2181,centos202:2181,centos203:2181");
 
         Connection conn = ConnectionFactory.createConnection(conf);
         Table table = conn.getTable(TableName.valueOf("yinew_profile"));
@@ -28,6 +27,7 @@ public class UserProfileDataGen {
         for (int i = 0; i < 100000; i++) {
 
             // 生成一个用户的画像标签数据
+            //即在第一个参数str的左侧补充第三个参数padStr一直到size位，上例即为在 i+“”的左侧补充0一直到字符串长度为6。
             String deviceId = StringUtils.leftPad(i + "", 6, "0");
             Put put = new Put(Bytes.toBytes(deviceId));
             for (int k = 1; k <= 100; k++) {

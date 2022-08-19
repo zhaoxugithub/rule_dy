@@ -17,8 +17,7 @@ public class Hbase_demo1 {
 
     Hbase_demo1() {
         configuration = HBaseConfiguration.create();
-        configuration.set("hbase.zookeeper.quorum", "1.15.149.196");
-        configuration.set("hbase.zookeeper.property.clientPort", "12181");
+        configuration.set("hbase.zookeeper.quorum", "centos201:2181,centos202:2181,centos203:2181");
         try {
             connection = ConnectionFactory.createConnection(configuration);
             hBaseAdmin = (HBaseAdmin) connection.getAdmin();

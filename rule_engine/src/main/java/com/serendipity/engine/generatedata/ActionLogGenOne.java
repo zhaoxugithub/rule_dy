@@ -11,7 +11,7 @@ import java.util.Properties;
 public class ActionLogGenOne {
     public static void main(String[] args) {
         Properties props = new Properties();
-        props.setProperty("bootstrap.servers", "1.15.149.196:9092");
+        props.setProperty("bootstrap.servers", "centos201:9092,centos202:9092,centos203:9092");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);

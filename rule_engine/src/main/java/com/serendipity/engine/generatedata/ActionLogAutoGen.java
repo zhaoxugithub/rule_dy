@@ -55,7 +55,7 @@ import java.util.Properties;
 public class ActionLogAutoGen {
     public static void main(String[] args) {
         Properties props = new Properties();
-        props.setProperty("bootstrap.servers", "1.15.149.196:9092");
+        props.setProperty("bootstrap.servers", "centos201:9092,centos202:9092,centos203:9092");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         // 创建多个线程，并行执行
