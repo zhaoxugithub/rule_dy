@@ -19,5 +19,5 @@ public class RuleConditions {
     //行为次数条件
     private List<EventParam> actionCountConditions;
     //行为序列条件
-    private List<EventParam> actionSequenceCondition;
+    private List<EventSequenceParam> actionSequenceCondition;
 }

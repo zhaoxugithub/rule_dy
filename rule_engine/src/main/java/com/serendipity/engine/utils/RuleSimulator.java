@@ -1,8 +1,11 @@
 package com.serendipity.engine.utils;
 
 import com.serendipity.engine.beans.EventParam;
+import com.serendipity.engine.beans.EventSequenceParam;
 import com.serendipity.engine.beans.RuleConditions;
+import org.jcodings.util.ArrayReader;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -51,7 +54,51 @@ public class RuleSimulator {
         EventParam eventParam = new EventParam(eventId, actionCountMap, countThreshold, timeRangeStart, timeRangeEnd, sql);
         ruleConditions.setActionCountConditions(Arrays.asList(eventParam));
         //行为序列条件
-        //ruleConditions.setActionSequenceCondition();
+        //表示先做什么，然后做什么，紧接着做什么
+        String eventId1 = "K";
+        HashMap<String, String> m1 = new HashMap<>();
+        m1.put("p5", "v2");
+        EventParam eventParam1 = new EventParam(eventId1, m1, 1, timeRangeStart, timeRangeEnd, "");
+
+        String eventId2 = "X";
+        HashMap<String, String> m2 = new HashMap<>();
+        m2.put("p3", "v2");
+        EventParam eventParam2 = new EventParam(eventId2, m2, 1, timeRangeStart, timeRangeEnd, "");
+
+//        String eventId3 = "C";
+//        //map里面封装的是条件属性
+//        HashMap<String, String> m3 = new HashMap<>();
+//        m2.put("p3", "v2");
+//        EventParam eventParam3 = new EventParam(eventId3, m3, 1, timeRangeStart, timeRangeEnd, "");
+
+        String sequenceQuerySQL = "select deviceId,\n" +
+                "       sequenceMatch('.*(?1).*(?2).*')(\n" +
+                "                     toDateTime(`timeStamp`),\n" +
+                "                     eventId = 'K',\n" +
+                "                     eventId = 'X'\n" +
+                "\n" +
+                "           ) as isMatch2,\n" +
+                "       --只匹配一种\n" +
+                "       sequenceMatch('.*(?1).*')(\n" +
+                "                     toDateTime(`timeStamp`),\n" +
+                "                     eventId = 'K',\n" +
+                "                     eventId = 'X'\n" +
+                "\n" +
+                "           ) as isMatch1\n" +
+                "from yinew_detail\n" +
+                "where deviceId = ? and timeStamp between ? AND ?\n" +
+                "  and (\n" +
+                "        (eventId = 'K' and properties['p5'] = 'v2')\n" +
+                "        or\n" +
+                "        (eventId = 'X' and properties['p3'] = 'v2')\n" +
+                "\n" +
+                "    )\n" +
+                "group by deviceId;\n";
+
+
+        EventSequenceParam sequenceParam = new EventSequenceParam("rule01", timeRangeStart, timeRangeEnd, Arrays.asList(eventParam1, eventParam2), sequenceQuerySQL);
+
+        ruleConditions.setActionSequenceCondition(Arrays.asList(sequenceParam));
         return ruleConditions;
     }
 }

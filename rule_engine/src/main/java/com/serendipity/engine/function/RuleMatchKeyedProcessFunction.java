@@ -1,16 +1,12 @@
 package com.serendipity.engine.function;
 
-import com.serendipity.engine.beans.EventBean;
-import com.serendipity.engine.beans.EventParam;
-import com.serendipity.engine.beans.RuleConditions;
-import com.serendipity.engine.beans.RuleMatchResult;
+import com.serendipity.engine.beans.*;
 import com.serendipity.engine.queryservice.ClickHouseQueryServiceImpl;
 import com.serendipity.engine.queryservice.HbaseQueryServiceImpl;
 import com.serendipity.engine.utils.ConnectionUtils;
 import com.serendipity.engine.utils.EventParamComparator;
 import com.serendipity.engine.utils.RuleSimulator;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
@@ -73,6 +69,13 @@ public class RuleMatchKeyedProcessFunction extends KeyedProcessFunction<String, 
             }
         }
         //TODO 行为序列是否满足
+        List<EventSequenceParam> actionSequenceCondition = rule.getActionSequenceCondition();
+        if (actionSequenceCondition != null && actionCountConditions.size() > 0) {
+            for (EventSequenceParam eventSequenceParam : actionSequenceCondition) {
+                int condition = clickHouseQueryService.queryEventSequenceCondition(eventBean.getDeviceId(), eventSequenceParam);
+                if (condition < eventSequenceParam.getEventSequece().size()) return;
+            }
+        }
         //TODO 模拟随机命中
         RuleMatchResult matchResult = new RuleMatchResult(eventBean.getDeviceId(), rule.getRuleId(), eventBean.getTimeStamp(), System.currentTimeMillis());
         collector.collect(matchResult);
