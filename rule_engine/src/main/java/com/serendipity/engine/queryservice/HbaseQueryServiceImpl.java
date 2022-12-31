@@ -24,19 +24,30 @@ public class HbaseQueryServiceImpl implements QueryService {
         this.hbaseConnection = connection;
     }
 
+    /**
+     * 查询hbase 中的结果和规则要求是否相同
+     *
+     * @param deviceId
+     * @param userProfileConditions
+     * @return
+     * @throws IOException
+     */
     public boolean queryProfileCondition(String deviceId, Map<String, String> userProfileConditions) throws IOException {
         Table table = hbaseConnection.getTable(TableName.valueOf("yinew_profile"));
-        //设置hbase的查询条件：rowKey
+        // 设置hbase的查询条件：rowKey
         Get get = new Get(deviceId.getBytes());
-        //设置要查询的family和qualifier(标签名称)
+        // 设置要查询的family和qualifier(标签名称)
         Set<String> tags = userProfileConditions.keySet();
         for (String tag : tags) {
+            // tag实际上就是列名称
             get.addColumn("f".getBytes(), tag.getBytes());
         }
-        //请求hbase查询hbase
+        // 请求hbase查询hbase
         Result result = table.get(get);
-        //根据规则条件去查询可能查询出来的是空值，所以这里需要进行判空操作
-        if (result.isEmpty()) return false;
+        // 根据规则条件去查询可能查询出来的是空值，所以这里需要进行判空操作
+        if (result.isEmpty()) {
+            return false;
+        }
         for (String tag : tags) {
             byte[] value = result.getValue("f".getBytes(), tag.getBytes());
             log.debug("hbase 查询结果为={}", new String(value));

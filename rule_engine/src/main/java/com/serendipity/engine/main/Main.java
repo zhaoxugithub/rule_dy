@@ -8,7 +8,6 @@ import com.serendipity.engine.source.KafkaConsumerBuilder;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
@@ -31,6 +30,7 @@ public class Main {
         DataStream<EventBean> dsBean = dds.map(new Json2EventBeanMapFunction()).filter(e -> e != null);
         //将数据编程keyStream,按照deviceId分区
         KeyedStream<EventBean, String> keyedStream = dsBean.keyBy(bean -> bean.getDeviceId());
+        //调用keyedStream的处理函数
         DataStream<RuleMatchResult> mathchResultDs = keyedStream.process(new RuleMatchKeyedProcessFunction());
         mathchResultDs.print("mathchResultDs=");
         env.execute();

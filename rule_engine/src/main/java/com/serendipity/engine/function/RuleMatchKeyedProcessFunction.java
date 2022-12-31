@@ -31,52 +31,67 @@ import java.util.Map;
 //<String, EventBean, RuleMatchResult> String是key,EventBean是输入类型，RuleMatchResult是输出类型
 @Slf4j
 public class RuleMatchKeyedProcessFunction extends KeyedProcessFunction<String, EventBean, RuleMatchResult> {
-
     private ClickHouseQueryServiceImpl clickHouseQueryService = null;
-
     private HbaseQueryServiceImpl hbaseQueryService = null;
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        //获取一个Hbase连接
+        // 获取一个Hbase连接
         hbaseQueryService = new HbaseQueryServiceImpl(ConnectionUtils.getHbaseConnection());
         clickHouseQueryService = new ClickHouseQueryServiceImpl(ConnectionUtils.getClickhouseConnection());
+        System.out.println("print");
     }
 
+    /**
+     * KeyedProcessFunction 继承了抽象富函数，所以具备算子的生命周期方法
+     *
+     * @param eventBean
+     * @param context
+     * @param collector
+     * @throws Exception
+     */
     @Override
     public void processElement(EventBean eventBean, KeyedProcessFunction<String, EventBean, RuleMatchResult>.Context context, Collector<RuleMatchResult> collector) throws Exception {
         log.debug("收到一条事件数据:eventId={},deviceId={},properties={}", eventBean.getEventId(), eventBean.getDeviceId(), eventBean.getProperties());
-        //获取一个规则
+        // 获取一条完成的规则事件(包括了触发事件，画像属性条件，行为次数条件，行为序列条件)
         RuleConditions rule = RuleSimulator.getRule();
-        //判断当前事件是否满足规则定义的触发事件条件
-        if (!EventParamComparator.compare(rule.getTriggerEvent(), eventBean)) return;
+        // 第一步：判断数据流中当前触发事件是否满足规则定义的触发事件条件
+        if (!EventParamComparator.compare(rule.getTriggerEvent(), eventBean)) {
+            return;
+        }
         log.debug("触发条件规则通过，满足事件id={}", "k");
-        //查询画像条件是否满足
+        // 第二步：去hbase查询画像条件是否满足
         Map<String, String> userProfileConditions = rule.getUserProfileConditions();
         boolean queryProfileCondition = false;
         if (userProfileConditions != null) {
             queryProfileCondition = hbaseQueryService.queryProfileCondition(eventBean.getDeviceId(), userProfileConditions);
-            //如果不满足画像规则条件则整个规则计算就退出
-            if (!queryProfileCondition) return;
+            // 如果不满足画像规则条件则整个规则计算就退出
+            if (!queryProfileCondition) {
+                return;
+            }
         }
-        //TODO 行为次数条件是否满足
+        // 第三步：行为次数条件是否满足
         List<EventParam> actionCountConditions = rule.getActionCountConditions();
         if (actionCountConditions != null && actionCountConditions.size() > 0) {
             for (EventParam actionCountCondition : actionCountConditions) {
                 long clickHouseCount = clickHouseQueryService.queryEventCountCondition(actionCountCondition, eventBean.getDeviceId(), actionCountCondition.getQuerySql());
-                //如果不满足就返回
-                if (clickHouseCount < actionCountCondition.getCountThreshold()) return;
+                // 如果不满足就返回
+                if (clickHouseCount < actionCountCondition.getCountThreshold()) {
+                    return;
+                }
             }
         }
-        //TODO 行为序列是否满足
+        // 第四步：行为序列是否满足
         List<EventSequenceParam> actionSequenceCondition = rule.getActionSequenceCondition();
         if (actionSequenceCondition != null && actionCountConditions.size() > 0) {
             for (EventSequenceParam eventSequenceParam : actionSequenceCondition) {
                 int condition = clickHouseQueryService.queryEventSequenceCondition(eventBean.getDeviceId(), eventSequenceParam);
-                if (condition < eventSequenceParam.getEventSequece().size()) return;
+                if (condition < eventSequenceParam.getEventSequece().size()) {
+                    return;
+                }
             }
         }
-        //TODO 模拟随机命中
+        // TODO 模拟随机命中
         RuleMatchResult matchResult = new RuleMatchResult(eventBean.getDeviceId(), rule.getRuleId(), eventBean.getTimeStamp(), System.currentTimeMillis());
         collector.collect(matchResult);
     }

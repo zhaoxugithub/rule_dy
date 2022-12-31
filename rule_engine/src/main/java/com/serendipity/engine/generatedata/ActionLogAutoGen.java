@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Properties;
 
 /**
-
  *
  * {
  * 	"account": "Vz54E9Ya",
@@ -47,11 +46,8 @@ import java.util.Properties;
  * bin/kafka-topics.sh --bootstrap-server 1.15.149.196:9092 --create --topic yinew_applog --partitions 2 --replication-factor 1
  * 创建完后，检查一下是否创建成功：
  * bin/kafka-topics.sh --bootstrap-server 1.15.149.196:9092 --list
- *
- *
  * bin/kafka-console-consumer.sh --topic yinew_applog --bootstrap-server 1.15.149.196:9092
  */
-
 public class ActionLogAutoGen {
     public static void main(String[] args) {
         Properties props = new Properties();
@@ -105,7 +101,6 @@ public class ActionLogAutoGen {
         logBean.setOsVersion("7.5");
         logBean.setReleaseChannel("小米应用市场");
         logBean.setResolution("2048*1024");
-
         /**
          * 生成事件ID
          */

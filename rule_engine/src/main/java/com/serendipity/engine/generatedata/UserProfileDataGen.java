@@ -47,7 +47,9 @@ public class UserProfileDataGen {
             System.out.println(i);
         }
         // 提交最后一批
-        if (puts.size() > 0) table.put(puts);
+        if (puts.size() > 0) {
+            table.put(puts);
+        }
         conn.close();
     }
 }

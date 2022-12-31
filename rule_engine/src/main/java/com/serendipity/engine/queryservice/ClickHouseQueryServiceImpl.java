@@ -42,7 +42,6 @@ public class ClickHouseQueryServiceImpl implements QueryService {
         while (resultSet.next()) {
             cnt = resultSet.getLong("cnt");
         }
-
         log.debug("cnt = {}", cnt);
         return cnt;
     }

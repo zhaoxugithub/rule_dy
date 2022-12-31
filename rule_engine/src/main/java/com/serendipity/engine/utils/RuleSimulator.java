@@ -3,9 +3,7 @@ package com.serendipity.engine.utils;
 import com.serendipity.engine.beans.EventParam;
 import com.serendipity.engine.beans.EventSequenceParam;
 import com.serendipity.engine.beans.RuleConditions;
-import org.jcodings.util.ArrayReader;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -23,6 +21,7 @@ import java.util.HashMap;
 public class RuleSimulator {
 
     public static RuleConditions getRule() {
+        //封装一条完成的规则对象
         RuleConditions ruleConditions = new RuleConditions();
         ruleConditions.setRuleId("rule_001");
 
@@ -36,23 +35,25 @@ public class RuleSimulator {
         //userMap2.put("tag26", "v1");
         ruleConditions.setUserProfileConditions(userMap2);
         //行为事件
+        //表示在哪段时间范围内就出发了哪些事件
         HashMap<String, String> actionCountMap = new HashMap<>();
 
         String eventId = "A";
         int countThreshold = 1;
-
         long timeRangeStart = 1623945600000L;
         long timeRangeEnd = Long.MAX_VALUE;
 
         String sql = "select count(1) as cnt\n" +
                 "from yinew_detail\n" +
-//                "where eventId = '" + eventId + "'\n and" +
+                //"where eventId = '" + eventId + "'\n and" +
                 " where  deviceId = ? \n" +
                 "  and timeStamp between " + timeRangeStart + " and " + timeRangeEnd + " ";
-//        actionCountMap.put("p6", "v2");
-//        actionCountMap.put("p7", "v2");
+       // actionCountMap.put("p6", "v2");
+       // actionCountMap.put("p7", "v2");
         EventParam eventParam = new EventParam(eventId, actionCountMap, countThreshold, timeRangeStart, timeRangeEnd, sql);
         ruleConditions.setActionCountConditions(Arrays.asList(eventParam));
+
+
         //行为序列条件
         //表示先做什么，然后做什么，紧接着做什么
         String eventId1 = "K";
@@ -65,11 +66,11 @@ public class RuleSimulator {
         m2.put("p3", "v2");
         EventParam eventParam2 = new EventParam(eventId2, m2, 1, timeRangeStart, timeRangeEnd, "");
 
-//        String eventId3 = "C";
-//        //map里面封装的是条件属性
-//        HashMap<String, String> m3 = new HashMap<>();
-//        m2.put("p3", "v2");
-//        EventParam eventParam3 = new EventParam(eventId3, m3, 1, timeRangeStart, timeRangeEnd, "");
+       // String eventId3 = "C";
+       // //map里面封装的是条件属性
+       // HashMap<String, String> m3 = new HashMap<>();
+       // m2.put("p3", "v2");
+       // EventParam eventParam3 = new EventParam(eventId3, m3, 1, timeRangeStart, timeRangeEnd, "");
 
         String sequenceQuerySQL = "select deviceId,\n" +
                 "       sequenceMatch('.*(?1).*(?2).*')(\n" +
@@ -97,7 +98,6 @@ public class RuleSimulator {
 
 
         EventSequenceParam sequenceParam = new EventSequenceParam("rule01", timeRangeStart, timeRangeEnd, Arrays.asList(eventParam1, eventParam2), sequenceQuerySQL);
-
         ruleConditions.setActionSequenceCondition(Arrays.asList(sequenceParam));
         return ruleConditions;
     }
