@@ -2,7 +2,6 @@ package com.serendipity.engine.queryservice;
 
 import com.serendipity.engine.beans.EventParam;
 import com.serendipity.engine.beans.EventSequenceParam;
-import jdk.nashorn.internal.ir.SplitReturn;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
